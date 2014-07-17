@@ -4,6 +4,11 @@ SendMode Input
 
 #include udf.ahk
 
+; Zeit bei einem Wanted richtig
+; Fehler behoben beim Fail
+; F4 zum beenden eingefügt
+; F5 zum reload eingefügt (Wenn das Spiel neugestartet wird)
+
 
 SetTimer, chatlog, 250
 SetTimer, HackTimer, 1000
@@ -22,6 +27,14 @@ return
 ~enter::
 ~numpadenter::
 	Suspend Off
+return
+
+F5::
+reload
+return
+
+F4::
+ExitApp
 return
 
 
@@ -49,7 +62,12 @@ If (CHATLOG_size != CHATLOG_oldsize)
 			RegExMatch(chat, "tens (.*) Wanteds entfernen." ,varr)
 			
 			Hack_Count := varr1
-			Hack_Time := varr1 * 30
+			
+			price := Hack_Count * 300000
+			if ( varr1 == 1 )
+				Hack_Time := 60
+			else
+				Hack_Time := varr1 * 30
 			Hack_CompleteTime := Hack_Time
 			Hack_Name := var1
 			price := varr1*300000
@@ -61,7 +79,10 @@ If (CHATLOG_size != CHATLOG_oldsize)
 		else if instr(chat, "Du hast dich in die Polizeiakte von " Hack_Name " gehackt und")
 		{
 			price := Hack_Count * 300000
-			time := Hack_Count * 30
+			if ( Hack_Count == 1 )
+				time := 60
+			else
+				time := Hack_Count * 30
 			sendChatMessage("/g [HACKER] Hack " Hack_Name " erfolgreich durchgeführt.")
 			sendChatMessage("/g Anzahl: " Hack_Count " | Dauer: " time " Sekunden | Preis: " price "$")
 			
@@ -72,12 +93,12 @@ If (CHATLOG_size != CHATLOG_oldsize)
 		}
 		else if ( instr(chat, "Hackversuch fehlgeschlagen") )
 		{
+			sendChatMessage("/g MIST! Hack an " Hack_Name "  ist fehlgeschlagen. Tut mir Leid =(")
+			sendChatMessage("/g Zeit durchgehalten: " Hack_CompleteTime-(Hack_CompleteTime-Hack_Time) " Sekunden")
 			Hack_Time := 0
 			Hack_Name = Unbekannt
 			Hack_Count := 0
 			Hack_Cooldown := 60*10
-			sendChatMessage("/g MIST! Hack an " Hack_Name "  ist fehlgeschlagen. Tut mir Leid =(")
-			sendChatMessage("/g Zeit durchgehalten: " Hack_CompleteTime-(Hack_CompleteTime-Hack_Time) " Sekunden")
 		}
 		CHATLOG_zeile := A_Index
 	}
