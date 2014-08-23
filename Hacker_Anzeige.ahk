@@ -4,10 +4,9 @@ SendMode Input
 
 #include udf.ahk
 
-; Zeit bei einem Wanted richtig
-; Fehler behoben beim Fail
-; F4 zum beenden eingefügt
-; F5 zum reload eingefügt (Wenn das Spiel neugestartet wird)
+; /hacktime zeigt die aktuelle Zeit an wielange man nicht hacken kann
+; Text beim Fail sollte nun die richtige Zeit anzeigen
+
 
 
 SetTimer, chatlog, 250
@@ -37,6 +36,18 @@ F4::
 ExitApp
 return
 
+:?:/hacktime::
+Suspend Permit
+SendInPut ^a{del}{enter}
+if ( Hack_Cooldown > 0 )
+{
+	addMessageToChatWindow("{AAAAFF}Es dauert nocht " Hack_Cooldown " Sekunden ( " Hack_Cooldown / 60 " Min) bis du wieder hacken kannst")
+}
+else
+{
+	addMessageToChatWindow("{AAAAFF}Du kannst hacken!")
+}
+return
 
 
 chatlog:
@@ -65,26 +76,33 @@ If (CHATLOG_size != CHATLOG_oldsize)
 			
 			price := Hack_Count * 300000
 			if ( varr1 == 1 )
-				Hack_Time := 60
+				Hack_Time := 50
 			else
-				Hack_Time := varr1 * 30
+				Hack_Time := varr1 * 25
 			Hack_CompleteTime := Hack_Time
 			Hack_Name := var1
 			price := varr1*300000
 			
+			minutes := Hack_Time//60,-1
+			seconds := Hack_Time-(minutes*60)
+			
 			sendChatMessage("/g [HACKER] Starte Hack von " Hack_Name ". Anzahl: " varr1)
-			sendChatMessage("/g [HACKER] Dauer: " Hack_Time " Sekunden | Preis bei Erfolg: " price " $")
+			sendChatMessage("/g [HACKER] Dauer: " minutes " Min, " seconds " Sek | Preis bei Erfolg: " price " $")
 			
 		}
 		else if instr(chat, "Du hast dich in die Polizeiakte von " Hack_Name " gehackt und")
 		{
 			price := Hack_Count * 300000
 			if ( Hack_Count == 1 )
-				time := 60
+				time := 50
 			else
-				time := Hack_Count * 30
+				time := Hack_Count * 25
+				
+			minutes := time//60,-1
+			seconds := time-(minutes*60)
+			
 			sendChatMessage("/g [HACKER] Hack " Hack_Name " erfolgreich durchgeführt.")
-			sendChatMessage("/g Anzahl: " Hack_Count " | Dauer: " time " Sekunden | Preis: " price "$")
+			sendChatMessage("/g [HACKER] Dauer: " minutes " Min, " seconds " Sek | Preis: " price " $")
 			
 			Hack_Time := 0
 			Hack_Name = Unbekannt
@@ -93,8 +111,8 @@ If (CHATLOG_size != CHATLOG_oldsize)
 		}
 		else if ( instr(chat, "Hackversuch fehlgeschlagen") )
 		{
-			sendChatMessage("/g MIST! Hack an " Hack_Name "  ist fehlgeschlagen. Tut mir Leid =(")
-			sendChatMessage("/g Zeit durchgehalten: " Hack_CompleteTime-(Hack_CompleteTime-Hack_Time) " Sekunden")
+			sendChatMessage("/g MIST! Hack an " Hack_Name "  ist fehlgeschlagen.")
+			sendChatMessage("/g Benötigte Restzeit: " Hack_Time " Sekunden")
 			Hack_Time := 0
 			Hack_Name = Unbekannt
 			Hack_Count := 0
